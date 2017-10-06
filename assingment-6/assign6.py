@@ -13,6 +13,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import numpy as np
 from random import shuffle
+from time import time
 
 
 def generateFilesPath (path,shuf=False):
@@ -60,25 +61,33 @@ def checkingDataset (path):
     if os.path.isfile(pathFiles+ '/Desc-classes.txt'):
         os.system('rm ' + pathFiles+ '/Desc-classes.txt')
 
-def get10MostCommonWords (path):
+def indexing (path):
+    initTime = time()
     arch = open(path,'r')
     allPaths = arch.readlines()
     arch.close()    
        
     # This var will be the dictionary containing all the words
     totalWords = Counter()
-
+    
+    # Just to follow the process
+    N = len(allPaths)
+    k = 1
     print 'Computing the 10 most frequent words...'
     
     for pa in allPaths:        
         arch = open (pa[:-1],'r')
+        #print 'Loading file ', k, ' of ', N
         for word in arch.read().replace(',','').replace('.','').replace(':','').replace(';','').replace('!','').replace('?','').lower().split():
             totalWords[word] += 1
         
         arch.close()
+        k+=1
+    
+    endTime = time()
         
     #print totalWords.most_common(10)
-    return totalWords
+    return totalWords, (endTime-initTime)
 
 
 #################### STARTING THE SCRIPT ###########################
@@ -89,11 +98,19 @@ pathFiles = path + '/aTribuna-21dir'
 checkingDataset (pathFiles)
 filesList = generateFilesPath (pathFiles,True)
 
-sizes = [1000, 2000, 4000, 16000, 32000, len(filesList)]
+#sizes = [1000, 2000, 4000, 16000, 32000, len(filesList)]
+sizes = [1000]
 
 getNFilesPath (filesList, sizes)
 
-get10MostCommonWords('filesPath1000.txt')
+time45 = []
+for i in xrange(15):
+    words45, t = indexing ('filesPath1000.txt')
+    time45.append(t)
+
+print words45.most_common(10)
+time45 = np.asarray(time45)
+print time45.mean(), time45.std()
 
 
 
