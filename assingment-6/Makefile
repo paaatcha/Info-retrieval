@@ -1,6 +1,5 @@
 run:		
 	python checkLibsPython.py
-	python assign6.py
+	python assign6.py 1000
 
-clean:
-	rm -rf arquivosaida.txt
+
