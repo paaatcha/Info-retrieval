@@ -4,16 +4,20 @@
 Author: André Pacheco
 Email: pacheco.comp@gmail.com
 
-This file contains the solution fot assignment 4
+Example of use:
+python assing6.py N
+N is the number of files to be indexed.
+
 """
 
 import os
+import sys
 import glob
 from collections import Counter
-import matplotlib.pyplot as plt
 import numpy as np
 from random import shuffle
 from time import time
+import subprocess
 
 
 def generateFilesPath (path,shuf=False):
@@ -73,7 +77,7 @@ def indexing (path):
     # Just to follow the process
     N = len(allPaths)
     k = 1
-    print 'Computing the 10 most frequent words...'
+    print 'Indexing the database using E12...'
     
     for pa in allPaths:        
         arch = open (pa[:-1],'r')
@@ -99,19 +103,46 @@ checkingDataset (pathFiles)
 filesList = generateFilesPath (pathFiles,True)
 
 #sizes = [1000, 2000, 4000, 16000, 32000, len(filesList)]
-sizes = [1000]
 
-getNFilesPath (filesList, sizes)
+# The number of files to be indexing is get through the command line
+# For example: python assing6.py 1000
+s = [int(sys.argv[1])]
+nIterations = 15
 
-time45 = []
-for i in xrange(15):
-    words45, t = indexing ('filesPath1000.txt')
-    time45.append(t)
+fil = 'filesPath' + str(s[0]) + '.txt'
+timeE12 = []
+timeALine = []
+out = 'Results for '+ str(s[0]) + ' files\n'
 
-print words45.most_common(10)
-time45 = np.asarray(time45)
-print time45.mean(), time45.std()
+for i in xrange(nIterations):
+    getNFilesPath (filesList,s)
+    out = out + '******** ITERATION ' + str(i+1) + '********\n\n'
+    # performing the E12 algorithm
+    wordsE12, tE12 = indexing (fil)
+    timeE12.append(tE12)
+    out = out + '*** E12 ***\n' + str(timeE12) + '\n'
+    
+    # Performing the aLine. Creating the cmd line
+    cmd = 'aLine -i -l ' + fil + ' -d aLine' + str(s[0])
+    taux = time()
+    proc = subprocess.Popen([cmd], stdout=subprocess.PIPE, shell=True)
+    timeALine.append(time()-taux)
+    (outaLine, err) = proc.communicate()
+    out = out + '*** aLine ***\n' + outaLine + '\n'
 
+    print 'Iteration: ', i
+
+
+timeE12 = np.asarray(timeE12)
+timeALine = np.asarray(timeALine)
+print '\n*** Statistics ***'
+print 'E12 mean: ', timeE12.mean(),' - E12 std: ', timeE12.std()
+print 'aLine mean: ', timeALine.mean(),' - aLine std: ', timeALine.std(), '\n'
+
+# Writing a file with the outputs
+arch = open('resultsLog'+str(s[0])+'.txt','w')
+arch.write(out)
+arch.close()
 
 
 
