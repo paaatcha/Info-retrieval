@@ -14,7 +14,6 @@ from random import shuffle
 from docx import Document
 from nltk import ngrams
 import json
-from reportlab.pdfgen import canvas
 
 def generateFilesPath (path,shuf=False,fileFormat='txt'):
     allFolders = glob.glob(path+'/*')
@@ -80,13 +79,40 @@ def docx2txt (filesList):
             arch.write(fullText)
             arch.close()
 
-def generatePDF (text, pathName):
-    c = canvas.Canvas(pathName)
-    c.drawText0(text.encode('utf-8'))
-    c.save()
+def generatePDFs (filesList):
+    ans = raw_input ('Do you wanna generate the PDF files (y or n)? ')
+    
+    if ans == 'yes' or ans == 'y':
+        print 'Generating the PDFs, please wait...'
+        
+        for fil in filesList:
+            print 'Coverting the file: ', fil[59:]
+            os.system ('doc2pdf ' + fil.replace(' ','\ '))
+            
+        return True
+    
+    return False
+    
+def generateHTML (filesList, pathName=None):
+    if pathName is None:
+        fileName = 'pagina.html'
+    else:
+        fileName = pathName
+        
+    arch = open(fileName, 'w')
+    arch.write('<! DOCTYPE html> <html> 	<head> <meta charset=\"utf-8\"> <title> Arquivos Usiel Carneiro </title> </head>')
+    arch.write('<h1 align=\"center\"> Lista dos arquivos escritos por Usiel Carneiro </h1> <hr> <body> <ul>')
+
+    for fil in filesList:
+        arch.write('<li> <p> <a align=\"center\" href=\"'+ fil +'\" target =\"_blank\" title =\"Abrir o arquivo\">'+ fil[59:] +'</a> </p> </li>')
+        
+    
+    arch.write('</ul> </body> </html>')
+    arch.close()
+    
     
             
-def getNGrams (path):    
+def getNGrams (path, amount=30):    
     arch = open(path,'r')
     allPaths = arch.readlines()
     arch.close()    
@@ -103,11 +129,11 @@ def getNGrams (path):
         freqTwoGrams = Counter(twoGrams)
         freqThreeGrams = Counter(threeGrams)
         arch.close()
-        #break
+
     print '**** Most frequency 2-grams ****'
-    print '\n'.join('Gram: %s - Freq: %s' % x for x in freqTwoGrams.most_common(5))
+    print '\n'.join('Gram: %s - Freq: %s' % x for x in freqTwoGrams.most_common(amount))
     print '\n**** Most frequency 3-grams ****'
-    print '\n'.join('Gram: %s - Freq: %s' % x for x in freqThreeGrams.most_common(5))
+    print '\n'.join('Gram: %s - Freq: %s' % x for x in freqThreeGrams.most_common(amount))
 
 
 def getSimilarityALine ():    
@@ -127,17 +153,21 @@ def getSpaceDensity (filesList, amount=5):
     n = sMat.shape[0]
     ns = 0
     mostSimi = list()
+    included = list()
     for k in xrange(n-1,0,-1):
-        if sMat[k][0] != sMat[k][1]:
+        t = (sMat[k][0], sMat[k][1])
+        if (t[0] != t[1]) and ((t[1],t[0]) not in included):
             ns += 1
+            included.append(t)
             mostSimi.append(sMat[k][:])
             if ns == amount:
                 break
+
     print '\n*** The most similarities files***'
     for k in mostSimi:
         print '--- Similarity: ', k[2], ' ---'
         print 'File 1: ', filesList[int(k[0])][59:]
-        print 'File 2: ', filesList[int(k[1])][59:]        
+        print 'File 2: ', filesList[int(k[1])][59:]
         print '\n'
 
 def getDictionaryALine (path):
@@ -145,8 +175,11 @@ def getDictionaryALine (path):
     indexWords = Counter()
     for line in arch.readlines():
         aux = line.split()
-        indexWords[aux[1]] = int(aux[2])
-        
+        w = aux[1].replace('”','').replace('“','').replace(' ','').replace('  ','').replace('‘','').replace('’','').replace(']','').replace('[','')
+        if w in indexWords:            
+            indexWords[w] += int(aux[2])
+        else:
+            indexWords[w] = int(aux[2])
     arch.close()
     return indexWords
 
@@ -160,7 +193,7 @@ def getMostCommon (indexWords, amount=30):
     print '\n'.join('Word: %s - Freq: %s' % x for x in most[0:amount])
     
     # Getting the most common adj and nouns:    
-    sintatic = json.load(open("sintatic-pt-br.txt", 'r'))
+    sintatic = json.load(open("dic-pt-br.txt", 'r'))
     adj = list()
     nAdj = 0
     nouns = list()
@@ -169,15 +202,16 @@ def getMostCommon (indexWords, amount=30):
         w = unicode(word[0],'utf-8').replace('"','')
         freq = word[1]
         try:
-            if (sintatic[w] == 'ADJ') and (nAdj < 30):
+            if (sintatic[w] == 'adj.') and (nAdj < 30):
                 nAdj +=1
                 adj.append((w,freq))
-            elif (sintatic[w][0] == 'N') and (nNouns < 30):
+            elif (sintatic[w] == 'm.' or sintatic[w] == 'f.') and (nNouns < 30):
                 nNouns += 1
                 nouns.append((w,freq))
         except KeyError:
-            pass
             #print w
+            pass
+            
                 
         if (nNouns > 30) and (nAdj > 30):
             break;
@@ -200,20 +234,20 @@ pathFiles = path + '/usielCarneiro'
 checkingDataset (pathFiles)
 
 # Getting the docx paths
-filesList = generateFilesPath (pathFiles, fileFormat='docx')
+filesListDocx = generateFilesPath (pathFiles, fileFormat='docx')
 
 # Converting the docx to txt
-docx2txt(filesList)
+docx2txt(filesListDocx)
 
 # Getting the txt paths
-filesList = generateFilesPath (pathFiles, fileFormat='txt')
-n = len(filesList)
+filesListTxt = generateFilesPath (pathFiles, fileFormat='txt')
+n = len(filesListTxt)
 
 # Writting the file of paths
-pathFiles = writeNFilesPath (filesList,n,'Usiel')
+pathFiles = writeNFilesPath (filesListTxt,n,'Usiel')
 
 # Getting the n-grams
-getNGrams (pathFiles)
+getNGrams (pathFiles, 30)
 
 
 ##############################  aLINE  ####################################
@@ -224,8 +258,14 @@ getSimilarityALine()
 ############################# The rest of metrics ########################
 indexWords = getDictionaryALine (path+'/aLineUsiel/dictionary.txt')
 getMostCommon (indexWords)
-getSpaceDensity (filesList)
+getSpaceDensity (filesListTxt, 10)
 
+
+############################# PDFs and HTML page #########################
+ans = generatePDFs (filesListDocx)
+if ans:
+    filesListPDF = [fil.replace('.docx','.pdf') for fil in filesListDocx]
+    generateHTML (filesListPDF, 'UsielCaneiro.html')
 
 
 
