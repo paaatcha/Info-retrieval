@@ -31,6 +31,22 @@ try:
 except ImportError, e:
     print 'The matplotlib lib is not installed. Insert your password to install it: \n'
     os.system("sudo apt-get install python-matplotlib")
+
+# Checking docx
+try:
+    import docx
+except ImportError, e:
+    print 'The docx lib is not installed. Insert your password to install it: \n'
+    os.system("sudo pip install python-docx")
+
+# Checking docx
+try:
+    import docx
+except ImportError, e:
+    print 'The nltk lib is not installed. Insert your password to install it: \n'
+    os.system("sudo pip install -U nltk")
+
+
     
 
 print 'Your PC has all the necessary libs. Let\'s the games begin'
