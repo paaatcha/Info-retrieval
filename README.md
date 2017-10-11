@@ -7,6 +7,8 @@ This repository contains my own implementations related to the UFES' discipline 
 * SciPy
 * Matplotlib
 * Pandas
+* python-docx
+* NLTK
 
 
 All assignments are divided into folders as follows:
