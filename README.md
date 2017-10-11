@@ -9,6 +9,7 @@ This repository contains my own implementations related to the UFES' discipline 
 * Pandas
 * python-docx
 * NLTK
+* python-json
 
 
 All assignments are divided into folders as follows:
