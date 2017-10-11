@@ -58,7 +58,7 @@ def checkingDataset (path):
         os.system('rm -rf usielCarneiro.tar.gz')
         print 'The files have been set'
     else:
-        print 'The database has been already downloaded'
+        print 'The database has already been downloaded'
 
 def docx2txt (filesList):
     for fil in filesList:
@@ -80,7 +80,7 @@ def docx2txt (filesList):
             arch.close()
 
 def generatePDFs (filesList):
-    ans = raw_input ('Do you wanna generate the PDF files (y or n)? ')
+    ans = raw_input ('Do you wanna generate the PDF files? (It is going to take some time (y or n)? ')
     
     if ans == 'yes' or ans == 'y':
         print 'Generating the PDFs, please wait...'
@@ -149,6 +149,9 @@ def getSpaceDensity (filesList, amount=5):
     sMat = np.loadtxt('similaridade.mtx', skiprows=2)
     simi = sum(sMat[:,2])
     print '\n**** Space density: ', simi-176, ' ****'
+    print '**** Average of similarity between the docs pairwise: ', simi/len(sMat), ' *****'
+    
+    
     sMat = sMat[sMat[:,2].argsort()]
     n = sMat.shape[0]
     ns = 0
@@ -192,6 +195,11 @@ def getMostCommon (indexWords, amount=30):
     print '\n**** The most common words ****'
     print '\n'.join('Word: %s - Freq: %s' % x for x in most[0:amount])
     
+    
+    # Getting the dictionary from my github
+    if not os.path.isfile('dic-pt-br.txt'): 
+        os.system ('wget https://raw.githubusercontent.com/paaatcha/dicionario-ptbr/master/dic-pt-br.txt')
+
     # Getting the most common adj and nouns:    
     sintatic = json.load(open("dic-pt-br.txt", 'r'))
     adj = list()
