@@ -54,6 +54,26 @@ def getIris (path):
 
     return irisIn, irisOut
 
+def cosSimilarity (x,y):
+    x = np.asarray(x)
+    y = np.asarray(y)
+    return (x.dot(y))/(np.linalg.norm(x)*np.linalg.norm(y))
+
+def getDensity (irisIn):
+    m,n = irisIn.shape
+    den = 0
+    for i1 in xrange(m):
+        for i2 in xrange(m):            
+            den += cosSimilarity(irisIn[i1,:], irisIn[i2,:])
+    
+    # Taking off the values when i=j
+    den -= m        
+    denMean = den/(m*m)
+    
+    return den, denMean
+    
+            
+
 
 def generateIdsTrainTest (siz, perc='0.3',irisOut=None):
     nTest = int(round(150*0.3))
@@ -101,6 +121,7 @@ def checkAccuracy (real, predict):
     
     # Priting the final accuracy
     print 'Correct predictions: ', acc, ' of ', nReal
+    return acc
 
     
 def aLineCmd (k=3):
@@ -118,5 +139,12 @@ irisIn, irisOut = getIris(pathIris)
 generateIdsTrainTest (len(irisIn), irisOut=irisOut)
 aLineCmd(7)
 checkAccuracy ('iris_class_test.txt', 'iris_class_predict.txt')
+den, avgDen = getDensity(irisIn)
+print 'Data set density: {}\nAverage of the density: {}'.format(den, avgDen)
+
+
+
+
+
 
 
