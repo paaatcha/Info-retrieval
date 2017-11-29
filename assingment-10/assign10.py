@@ -11,6 +11,7 @@ Email: pacheco.comp@gmail.com
 import os
 import numpy as np
 from random import shuffle
+import sys
 
 def checkingDataset (path):     
     # checking if the files was downloaded    
@@ -75,6 +76,14 @@ def getDensity (irisIn):
     denMean = den/(m*m)
     
     return den, denMean
+
+def setIDF (data):
+    N = data.shape[0]       
+    data2 = np.zeros_like(data)
+    for i in xrange(N):
+        data2[i] = data[i] * (np.log2(N) - np.log2(data[i]) + 1) 
+        
+    return data2
     
 def getDensityToCluster (data, centroid):
     data = np.asarray(data)       
@@ -167,6 +176,31 @@ def clustersInDict(irisIn, pathOut):
         irisClusters[outClusters[i]].append(irisIn[i])
         
     return irisClusters
+    
+def getMetricsTable (irisIn):
+    checkAccuracy ('iris_class.txt', 'output.clustering')
+    den, avgDen = getDensity(irisIn)
+    print 'Data set density: {}\nAverage of the density: {} \n'.format(den, avgDen)
+    
+    irisClusters = clustersInDict (irisIn, 'output.clustering')
+    cents = getCentroids ('centroids.mtx')
+    gCluster = cents.mean(axis=0)
+    
+    den = 0
+    for i in range(K):
+        den += getDensityToCluster (irisClusters[i], cents[i])
+        
+    print 'AVG similarity between docs and corresponding centroids (x): ', den/K, '\n'
+    x = den/K
+    
+    den = getDensityToCluster (cents, gCluster)
+    print 'AVG similarity between centroids and main centroid: ', den, '\n'
+    
+    _,den = getDensity (cents)
+    print 'AVG similarity between pairs of cluster centroids (y): ', den, '\n'
+    y = den
+    
+    print 'Ratio y/x: ', y/x    
 
 
 path = os.getcwd() # my actual path
@@ -177,30 +211,12 @@ checkingDataset(pathIris)
 irisIn, irisOut = getIris(pathIris)
 
 #aLineCmd()
-checkAccuracy ('iris_class.txt', 'output.clustering')
-den, avgDen = getDensity(irisIn)
-print 'Data set density: {}\nAverage of the density: {} \n'.format(den, avgDen)
 
-irisClusters = clustersInDict (irisIn, 'output.clustering')
-cents = getCentroids ('centroids.mtx')
-gCluster = cents.mean(axis=0)
+getMetricsTable (irisIn)
 
-den = 0
-for i in range(K):
-    den += getDensityToCluster (irisClusters[i], cents[i])
-    
-print 'AVG similarity between docs and corresponding centroids (x): ', den/K, '\n'
-x = den/K
+print ('\n ------------------------------------------ ')
 
-den = getDensityToCluster (cents, gCluster)
-print 'AVG similarity between centroids and main centroid: ', den, '\n'
-
-_,den = getDensity (cents)
-print 'AVG similarity between pairs of cluster centroids (y): ', den, '\n'
-y = den
-
-print 'Ratio y/x: ', y/x
-
+getMetricsTable (setIDF(irisIn))
 
 
 
