@@ -18,6 +18,7 @@ import numpy as np
 from random import shuffle
 from time import time
 import subprocess
+import math
 
 
 def generateFilesPath (path,shuf=False):
@@ -32,15 +33,14 @@ def generateFilesPath (path,shuf=False):
         
     return allFiles
 
-def getNFilesPath (filesList, sizes):    
-    for k in xrange(len(sizes)):        
-        print 'Writing the output with ' + str(sizes[k]) + ' files'
-        arch = open ('filesPath'+str(sizes[k])+'.txt', 'w')
+def getNFilesPath (filesList, size):     
+    print 'Writing the output with ' + str(size) + ' files'
+    arch = open ('filesPath'+str(size)+'.txt', 'w')
+    
+    for i in xrange(size):       
+        arch.write(filesList[i]+'\n')
         
-        for i in xrange(sizes[k]):       
-            arch.write(filesList[i]+'\n')
-            
-        arch.close()
+    arch.close()
     
     
 def checkingDataset (path):     
@@ -64,11 +64,39 @@ def checkingDataset (path):
         os.system('rm ' + pathFiles+'/classes.txt')
     if os.path.isfile(pathFiles+ '/Desc-classes.txt'):
         os.system('rm ' + pathFiles+ '/Desc-classes.txt')
+        
+def aLineCmdIndex (fil, fold):    
+    cmd = 'aLine -i -l ' + fil + ' -d '+ fold
+    os.system(cmd)    
+    
+def aLineCmdCluster (fold, k=3, nIter=200):    
+    cmd = 'aLine --clustering --algorithm kmeans --features '+ fold +'/cache.txt -k '+ str(k) +' --num-inter '+ str(nIter)
+    os.system(cmd)
+
+def aLineCmdVecs (fold):
+    cmd = 'aLine -d '+ fold +' --convert'
+    os.system(cmd)
+
+def getDimVec (path):    
+    with open(path,'r') as f:        
+        dim = int(f.readlines()[1].split(':')[1])        
+    return dim
+    
+def getVectors (path, dim, s):
+    feat = np.loadtxt(path,skiprows=2,dtype=np.int32)
+    vecs = np.zeros((s,dim))    
+    
+    for f in feat:
+        vecs[f[0]-1, f[1]-1] = f[2]        
+    
+    return vecs
+    
 
 def cosSimilarity (x,y):
-    x = np.asarray(x)
-    y = np.asarray(y)
-    return (x.dot(y))/(np.linalg.norm(x)*np.linalg.norm(y))
+    out = (x.dot(y))/(np.linalg.norm(x)*np.linalg.norm(y))
+    if math.isnan(out):
+        out = 0
+    return out
 
 def getDensity (irisIn):
     m,n = irisIn.shape
@@ -76,6 +104,7 @@ def getDensity (irisIn):
     for i1 in xrange(m):
         for i2 in xrange(m):            
             den += cosSimilarity(irisIn[i1,:], irisIn[i2,:])
+            
     
     # Taking off the values when i=j
     den -= m        
@@ -88,6 +117,7 @@ def getDensityToCluster (data, centroid):
     m,n = data.shape
     den = 0
     for i in xrange(m):
+#        print centroid
         den += cosSimilarity(data[i], centroid)        
         
     return den/m
@@ -119,20 +149,17 @@ def checkAccuracy (real, predict):
     print 'Correct predictions: ', acc, ' of ', nReal
     return acc
 
-    
-def aLineCmdCluster (k=3, nIter=200):    
-    cmd = 'aLine --clustering --algorithm kmeans --features aLine100/cache.txt -k '+ str(k) +' --num-inter '+ str(nIter)
-    os.system(cmd)
 
-def getCentroids (centroids):
-    cent = np.loadtxt('centroids.mtx', skiprows=1)
-    nCent = int(cent[0,2]/4)
-    cents = list()
+
+def getCentroids (path, k, dim):
+    feat = np.loadtxt(path,skiprows=2)    
+    #dim = int(feat[0,2])
+    cents = np.zeros((k,dim))        
+        
+    for f in feat:
+        cents[int(f[0]-1), int(f[1]-1)] = f[2]        
     
-    for i in range(1,nCent*4,4):
-        cents.append(cent[i:i+4,2])
-    
-    return np.asarray(cents)
+    return cents
 
 def clustersInDict(irisIn, pathOut):
     outClusters = np.loadtxt(pathOut)
@@ -147,31 +174,59 @@ def clustersInDict(irisIn, pathOut):
         
     return irisClusters
 
-
-def aLineCmdIndex (fil, s):    
-    cmd = 'aLine -i -l ' + fil + ' -d aLine' + str(s[0])
-    os.system(cmd)
+def getMetricsTable (data, cents, dataClusters, K):
+    #checkAccuracy ('iris_class.txt', 'output.clustering')
+    den, avgDen = getDensity(data)
+    print 'Data set density: {}\nAverage of the density: {} \n'.format(den, avgDen)
+    
+   
+    gCluster = cents.mean(axis=0)
+    
+    den = 0
+    for i in range(K):
+        den += getDensityToCluster (dataClusters[i], cents[i])
+        
+    print 'AVG similarity between docs and corresponding centroids (x): ', den/K, '\n'
+    x = den/K
+    
+    den = getDensityToCluster (cents, gCluster)
+    print 'AVG similarity between centroids and main centroid: ', den, '\n'
+    
+    _,den = getDensity (cents)
+    print 'AVG similarity between pairs of cluster centroids (y): ', den, '\n'
+    y = den
+    
+    print 'Ratio y/x: ', y/x    
 
 
 #################### STARTING THE SCRIPT ###########################
 
 path = os.getcwd() # my actual path
 pathFiles = path + '/aTribuna-21dir'  
+fold = 'aTribuna'
 
 checkingDataset (pathFiles)
 filesList = generateFilesPath (pathFiles,True)
 
-
-
-# The number of files to be indexing is get through the command line
-# For example: python assing6.py 1000
-s = [int(sys.argv[1])]
+s = int(sys.argv[1])
+k = int(sys.argv[2])
+fold = fold
 getNFilesPath (filesList,s)
-fil = 'filesPath' + str(s[0]) + '.txt'
+fil = 'filesPath.txt'
 
-aLineCmdIndex (fil, s)
+aLineCmdIndex(fil, fold)
+aLineCmdCluster (fold, k, nIter=10)
+aLineCmdVecs (fold)
+
+dimVec = getDimVec (fold+'/dataset.conf')
+#dimVec = getDimVec ('dataset.conf')
+vecs = getVectors (fold+'/features.mtx', dimVec, s)
+#vecs = getVectors ('features.mtx', dimVec, s)
+dataClusters = clustersInDict (vecs, 'output.clustering')
+centroids = getCentroids('centroids.mtx',k, dimVec) 
 
 
+getMetricsTable (vecs, centroids, dataClusters, k)
 
 
 

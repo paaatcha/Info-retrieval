@@ -32,13 +32,6 @@ except ImportError, e:
     print 'The matplotlib lib is not installed. Insert your password to install it: \n'
     os.system("sudo apt-get install python-matplotlib")
 
-# Checking pyevolve
-try:
-    import pyevolve
-except ImportError, e:
-    print 'The pyevolve lib is not installed. Insert your password to install it: \n'
-    os.system("sudo easy_install --upgrade pyevolve")
-    os.system("sudo easy_install pyevolve")
     
 
 print 'Your PC has all the necessary libs. Let\'s the games begin'
