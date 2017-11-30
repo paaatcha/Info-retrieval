@@ -210,7 +210,7 @@ K = 3
 checkingDataset(pathIris)
 irisIn, irisOut = getIris(pathIris)
 
-#aLineCmd()
+aLineCmd(K)
 
 getMetricsTable (irisIn)
 
