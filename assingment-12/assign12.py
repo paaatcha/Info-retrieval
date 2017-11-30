@@ -78,9 +78,10 @@ for it in range(nIter):
     out_test = ind2vec(dataset[sli:nsp,feat-1]-1)
     
     IDF, acc = GA(4, 10, (0,4), fit_func=fitness, params=(in_train, out_train, in_test, out_test, k)) 
-        
-    print IDF
-    print acc
+    
+    print 'Iteration {}'.format(it)
+    print 'IDF: {}'.format(IDF)
+    print 'Accuracy: {}\n'.format(acc)
     
     
     res = knn (in_train * IDF[:-1], out_train, in_test * IDF[:-1], k)
