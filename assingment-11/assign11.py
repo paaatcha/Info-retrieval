@@ -35,7 +35,7 @@ def generateFilesPath (path,shuf=False):
 
 def getNFilesPath (filesList, size):     
     print 'Writing the output with ' + str(size) + ' files'
-    arch = open ('filesPath'+str(size)+'.txt', 'w')
+    arch = open ('filesPath.txt', 'w')
     
     for i in xrange(size):       
         arch.write(filesList[i]+'\n')
@@ -203,7 +203,7 @@ def getMetricsTable (data, cents, dataClusters, K):
 
 path = os.getcwd() # my actual path
 pathFiles = path + '/aTribuna-21dir'  
-fold = 'aTribuna'
+fold = 'aTribuna/'
 
 checkingDataset (pathFiles)
 filesList = generateFilesPath (pathFiles,True)
@@ -218,9 +218,9 @@ aLineCmdIndex(fil, fold)
 aLineCmdCluster (fold, k, nIter=10)
 aLineCmdVecs (fold)
 
-dimVec = getDimVec (fold+'/dataset.conf')
+dimVec = getDimVec (fold+'dataset.conf')
 #dimVec = getDimVec ('dataset.conf')
-vecs = getVectors (fold+'/features.mtx', dimVec, s)
+vecs = getVectors (fold+'features.mtx', dimVec, s)
 #vecs = getVectors ('features.mtx', dimVec, s)
 dataClusters = clustersInDict (vecs, 'output.clustering')
 centroids = getCentroids('centroids.mtx',k, dimVec) 
