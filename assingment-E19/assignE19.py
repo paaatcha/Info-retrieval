@@ -187,14 +187,16 @@ def PDFClassification (paths):
     
     n = len(paths)
     k = 1
-    paths = paths[0:100]
+#    paths = paths[0:100]
     for p in paths:
         print 'Loading PDF {} of {}'.format(k,n)
         k+=1
         
-        cmd = 'pdf2txt.py -m 4 '+ p 
+        
+        cmd = 'pdf2txt.py -P "" -m 4 '+ p 
         proc = subprocess.Popen([cmd], stdout=subprocess.PIPE, shell=True)
-        text, err = proc.communicate()    
+        text, err = proc.communicate()            
+
         words = formatText(text)
         label = probabilities (words)
         
@@ -212,7 +214,8 @@ pathRepo = path + '/repositorio-ufes/documentos'
 
 checkingDataset (path+'/repositorio-ufes')
 pathsPDFs = getPDFsPath(pathRepo)
-PDFClassification(pathsPDFs)
+
+PDFClassification(pathsPDFs)    
 
 
 #print text
