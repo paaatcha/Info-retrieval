@@ -1,0 +1,12 @@
+## SUSPEITA DE PLÁGIO ENCONTRADA ##
+URL: http://www.computacaointeligente.com.br/algoritmos/mapas-auto-organizaveis-som/
+
+## PARTE DO TEXTO SUSPEITA ##
+som possui diferentes arquiteturas utilizada é bidimensional ilustrado figura 1 pode observado rede é grid 2d cada entrada estará conectada todos neurônios mapa neste caso possui 20 neurônios grid 4 x 5 além disso observe não existe conexões neurônios rede cada neurônio possui conjunto peso dimensão igual número features conjunto dados exemplo conjunto fora base dados iris possui 4 features (largura comprimento pétalas sépalas) cada neurônio vai possuir 4 pesos cada conectados feature diferente
+
+## SUSPEITA DE PLÁGIO ENCONTRADA ##
+URL: http://www.computacaointeligente.com.br/artigos/redes-neurais-convolutivas-cnn/
+
+## PARTE DO TEXTO SUSPEITA ##
+cnns são similares redes neurais tradicionais ambas são compostas neurônios possuem pesos bias necessitam treinados cada neurônio recebe algumas entradas aplica produto escalar entradas pesos além função não-linear além disso ambas possuem última camada toda conectada todos artifícios utilizados melhorar rede neural tradicional também são aplicados nesta camada dessa forma vantagem utilizar cnn cnn assume todas entradas são imagens permite codificar algumas propriedade arquitetura redes neurais tradicionais não são escaláveis imagens vez mesma produz número alto pesos serem treinados [6]
+
