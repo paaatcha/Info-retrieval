@@ -115,13 +115,12 @@ def compare (wordsQuery, fullText, URL, sizeCompT=100, sizeCompQ=100, threshold=
             compText = ' '.join(wordsText[offset:end])    
             ratio = SequenceMatcher(None,compQuery,compText).ratio()
             
+            
+            
             if ratio > threshold:                
-                output += '## SUSPEITA DE PLÁGIO ENCONTRADA ##\n'
-                output += 'URL: ' + URL + '\n\n'
-                output += '## PARTE DO TEXTO SUSPEITA ##\n'
-                output += compQuery+'\n\n'                    
-                
-                
+                output += '<cpy metric=cos sim={} href={}>\n'.format(ratio,URL)
+                output += compQuery
+                output += '\n</cpy>\n\n'               
                 
     return output
                 
