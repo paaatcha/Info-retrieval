@@ -84,10 +84,16 @@ def getURLsFromQuery (query):
 
 
 #################### STARTING THE SCRIPT ###########################
-pathQuery = 'query.txt'
-query = loadQuery (pathQuery)
+#pathQuery = 'query.txt'
+#query = loadQuery (pathQuery)
+#
+#print query
 
-print query
+url = 'http://www.inf.pucrs.br/gonzalez/docs/expanconsul.pdf'
+html = urllib.urlopen(url).read()
+soup = BeautifulSoup(html)
+
+print soup
 #allTexts, allURLs = getURLsFromQuery(query)
     
 
