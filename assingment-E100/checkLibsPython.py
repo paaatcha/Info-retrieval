@@ -33,6 +33,8 @@ except ImportError, e:
     os.system("sudo apt-get install python-matplotlib")
 
 # Checking BeautifulSoup
+os.system("pip install --upgrade html5lib==1.0b8")
+
 try:
     import bs4
 except ImportError, e:
